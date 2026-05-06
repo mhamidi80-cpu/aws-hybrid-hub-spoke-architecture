@@ -1,3 +1,39 @@
+# AWS Hybrid Hub-and-Spoke Architecture
+
+## Overview
+This project implements a professional **Hub-and-Spoke** network topology in AWS using **Terraform**. It simulates a hybrid cloud environment where a central "Inspection" Hub manages traffic between multiple private "Spoke" VPCs and an on-premises data center.
+
+## Architecture Components
+- **The Hub (Inspection VPC):** Centralized VPC containing the Transit Gateway (TGW) and a secure Bastion Host.
+- **The Spokes:** 
+    - **Spoke A (Production):** Isolated workload environment.
+    - **Spoke B (Development):** Segmented testing environment.
+- **Transit Gateway (TGW):** The "Network Brain" routing traffic between VPCs and the VPN.
+- **Security & Management:**
+    - **Bastion Host:** Single, secure entry point for administrative SSH access.
+    - **Security Groups:** Micro-segmentation allowing only specific web and management traffic.
+    - **Route Tables:** Custom routing ensuring all inter-spoke traffic is inspected.
+
+## Security Features
+- **No Direct Internet Access:** All Spoke instances are in private subnets.
+- **Least Privilege:** Security groups restrict SSH access specifically to the Bastion host.
+- **Centralized Inspection:** Architecture is ready for AWS Network Firewall integration at the Hub.
+
+## Tech Stack
+- **Terraform** (Infrastructure as Code)
+- **AWS** (VPC, TGW, EC2, VPN)
+- **Linux** (Development on ThinkPad P50)
+
+##  Topology
+![Network Topology](./Global_Toplogy.png)
+*Note: The management path (M1) represents the logical SSH session from the administrator workstation to the Bastion via the Internet Gateway.*
+
+## How to Deploy
+1. Clone the repo: `git clone https://github.com/mhamidi80-cpu/aws-hybrid-hub-spoke-architecture.git`
+2. Initialize Terraform: `terraform init`
+3. Plan the infrastructure: `terraform plan`
+4. Apply changes: `terraform apply`
+
 Hybrid Cloud Modernization: Secure Hub-and-Spoke Architecture
 
 Consultant: Mohamed Hamidi
