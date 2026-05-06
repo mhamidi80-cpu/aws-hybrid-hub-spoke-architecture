@@ -9,3 +9,13 @@ output "spoke_a_vpc_id" {
 output "spoke_b_vpc_id" {
   value = aws_vpc.spoke_b.id
 }
+
+output "spoke_a_web_sg_id" {
+  value = aws_security_group.spoke_a_web_sg.id
+}
+
+output "spoke_b_dev_sg_id" {
+  value = aws_security_group.spoke_b_dev_sg.id
+}
+
+

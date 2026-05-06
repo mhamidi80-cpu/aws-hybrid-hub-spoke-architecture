@@ -100,3 +100,60 @@ resource "aws_route_table_association" "spoke_b_assoc" {
   route_table_id = aws_route_table.spoke_b_rt.id
 }
 
+
+# --- Security Group for Spoke A (Production) ---
+resource "aws_security_group" "spoke_a_web_sg" {
+  name        = "spoke-a-web-sg"
+  description = "Allow web traffic and internal SSH"
+  vpc_id      = aws_vpc.spoke_a.id
+
+  # Allow Web Traffic from anywhere
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow SSH only from your Paris Office/VPN Range
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/8"] # Internal corporate range
+  }
+
+  # Outbound: Allow everything
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "Spoke-A-Web-SG" }
+}
+
+# --- Security Group for Spoke B (Development) ---
+resource "aws_security_group" "spoke_b_dev_sg" {
+  name   = "spoke-b-dev-sg"
+  vpc_id = aws_vpc.spoke_b.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.2.1.0/24"] # Only allow SSH from within the same subnet
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "Spoke-B-Dev-SG" }
+}
+
+
