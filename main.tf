@@ -157,3 +157,50 @@ resource "aws_security_group" "spoke_b_dev_sg" {
 }
 
 
+
+# 1. Add Internet Gateway to the Hub VPC
+resource "aws_internet_gateway" "hub_igw" {
+  vpc_id = aws_vpc.inspection_vpc.id
+  tags   = { Name = "Hub-IGW" }
+}
+
+# 2. Create a Public Subnet for the Bastion
+resource "aws_subnet" "hub_public_subnet" {
+  vpc_id                  = aws_vpc.inspection_vpc.id
+  cidr_block              = "10.100.1.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "eu-west-3a"
+  tags                    = { Name = "Hub-Public-Subnet" }
+}
+
+# 3. Security Group for Bastion (SSH from YOUR IP only)
+resource "aws_security_group" "bastion_sg" {
+  name   = "bastion-sg"
+  vpc_id = aws_vpc.inspection_vpc.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # In production, replace with your actual Home/Office IP
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# 4. The Bastion Instance (t3.micro is free-tier eligible)
+resource "aws_instance" "bastion" {
+  ami                    = "ami-05b457b541faec0ca" # Amazon Linux 2023 in eu-west-3
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.hub_public_subnet.id
+  vpc_security_group_ids = [aws_security_group.bastion_sg.id]
+
+  tags = { Name = "Bastion-Jump-Server" }
+}
+
+
