@@ -63,10 +63,12 @@ resource "aws_nat_gateway" "nat_gw_b" {
 }
 # Enable Appliance Mode on the Transit Gateway Attachment for "Hairpinning"
 resource "aws_ec2_transit_gateway_vpc_attachment" "inspection_attach" {
-  subnet_ids             = [aws_subnet.hub_public_subnet.id]
+  # Update these IDs to point to the new Transit subnets
+  subnet_ids             = [aws_subnet.hub_transit_a.id, aws_subnet.hub_transit_b.id]
+  
   transit_gateway_id     = aws_ec2_transit_gateway.hub.id
   vpc_id                 = aws_vpc.inspection_vpc.id
-  appliance_mode_support = "enable" # Crucial for stateful inspection
+  appliance_mode_support = "enable" # Required for stateful firewall inspection
   tags                   = { Name = "TGW-Attach-Hub-Inspection" }
 }
 
