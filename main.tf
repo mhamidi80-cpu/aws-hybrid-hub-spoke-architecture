@@ -1,3 +1,75 @@
+# --- Disaster Recovery: AWS Backup ---
+resource "aws_backup_vault" "paris_vault" {
+  name = "paris-primary-vault"
+}
+
+resource "aws_backup_vault" "frankfurt_vault" {
+  provider = aws.dr_region
+  name     = "frankfurt-dr-vault"
+}
+
+resource "aws_backup_plan" "dr_plan" {
+  name = "hybrid-dr-plan-4hr-rto"
+
+  rule {
+    rule_name         = "daily-backup-with-replication"
+    target_vault_name = aws_backup_vault.paris_vault.name
+    schedule          = "cron(0 12 * * ? *)"
+
+    copy_action {
+      destination_vault_arn = aws_backup_vault.frankfurt_vault.arn
+    }
+  }
+}
+
+
+# --- AWS Network Firewall Configuration ---
+resource "aws_networkfirewall_firewall_policy" "hub_policy" {
+  name = "hub-inspection-policy"
+  firewall_policy {
+    stateless_default_actions          = ["aws:forward_to_sfe"]
+    stateless_fragment_default_actions = ["aws:forward_to_sfe"]
+  }
+}
+
+resource "aws_networkfirewall_firewall" "hub_firewall" {
+  name                = "hub-firewall"
+  firewall_policy_arn = aws_networkfirewall_firewall_policy.hub_policy.arn
+  vpc_id              = aws_vpc.inspection_vpc.id
+
+  subnet_mapping {
+    subnet_id = aws_subnet.hub_public_subnet.id # Place in public for egress inspection
+  }
+
+  tags = { Name = "Hub-Firewall" }
+}
+
+# --- High Availability for Hub ---
+resource "aws_subnet" "hub_public_subnet_b" {
+  vpc_id            = aws_vpc.inspection_vpc.id
+  cidr_block        = "10.100.2.0/24"
+  availability_zone = "eu-west-3b" # Redundancy in Zone B
+  tags              = { Name = "Hub-Public-Subnet-B" }
+}
+
+resource "aws_eip" "nat_b" {
+  domain = "vpc"
+}
+
+resource "aws_nat_gateway" "nat_gw_b" {
+  allocation_id = aws_eip.nat_b.id
+  subnet_id     = aws_subnet.hub_public_subnet_b.id
+  tags          = { Name = "NAT-GW-AZ-B" }
+}
+# Enable Appliance Mode on the Transit Gateway Attachment for "Hairpinning"
+resource "aws_ec2_transit_gateway_vpc_attachment" "inspection_attach" {
+  subnet_ids             = [aws_subnet.hub_public_subnet.id]
+  transit_gateway_id     = aws_ec2_transit_gateway.hub.id
+  vpc_id                 = aws_vpc.inspection_vpc.id
+  appliance_mode_support = "enable" # Crucial for stateful inspection
+  tags                   = { Name = "TGW-Attach-Hub-Inspection" }
+}
+
 # --- Spoke A: Production ---
 resource "aws_vpc" "spoke_a" {
   cidr_block           = "10.1.0.0/16"
