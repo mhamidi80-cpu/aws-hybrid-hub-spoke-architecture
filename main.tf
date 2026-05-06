@@ -65,3 +65,38 @@ resource "aws_customer_gateway" "paris_dc" {
   ip_address = "203.0.113.12" # Representative On-Prem IP
   type       = "ipsec.1"
 }
+
+# --- Routing for Spoke A ---
+resource "aws_route_table" "spoke_a_rt" {
+  vpc_id = aws_vpc.spoke_a.id
+
+  route {
+    cidr_block         = "0.0.0.0/0"
+    transit_gateway_id = aws_ec2_transit_gateway.hub.id
+  }
+
+  tags = { Name = "Spoke-A-RT" }
+}
+
+resource "aws_route_table_association" "spoke_a_assoc" {
+  subnet_id      = aws_subnet.spoke_a_subnet.id
+  route_table_id = aws_route_table.spoke_a_rt.id
+}
+
+# --- Routing for Spoke B ---
+resource "aws_route_table" "spoke_b_rt" {
+  vpc_id = aws_vpc.spoke_b.id
+
+  route {
+    cidr_block         = "0.0.0.0/0"
+    transit_gateway_id = aws_ec2_transit_gateway.hub.id
+  }
+
+  tags = { Name = "Spoke-B-RT" }
+}
+
+resource "aws_route_table_association" "spoke_b_assoc" {
+  subnet_id      = aws_subnet.spoke_b_subnet.id
+  route_table_id = aws_route_table.spoke_b_rt.id
+}
+
