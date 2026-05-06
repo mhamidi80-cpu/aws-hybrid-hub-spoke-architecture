@@ -1,3 +1,41 @@
+resource "aws_route_table" "hub_transit_rt" {
+  vpc_id = aws_vpc.inspection_vpc.id
+
+  route {
+    cidr_block      = "0.0.0.0/0"
+    vpc_endpoint_id = element([for s in aws_networkfirewall_firewall.hub_firewall.firewall_status[0].sync_states : s.attachment[0].endpoint_id], 0)
+  }
+
+  tags = { Name = "Hub-Transit-RT" }
+}
+
+resource "aws_route_table_association" "hub_transit_assoc_a" {
+  subnet_id      = aws_subnet.hub_transit_a.id
+  route_table_id = aws_route_table.hub_transit_rt.id
+}
+
+# --- Hub Transit Subnets (Dedicated for TGW) ---
+resource "aws_subnet" "hub_transit_a" {
+  vpc_id            = aws_vpc.inspection_vpc.id
+  cidr_block        = "10.100.10.0/28"
+  availability_zone = "eu-west-3a"
+  tags              = { Name = "Hub-Transit-Subnet-A" }
+}
+
+resource "aws_subnet" "hub_transit_b" {
+  vpc_id            = aws_vpc.inspection_vpc.id
+  cidr_block        = "10.100.10.16/28"
+  availability_zone = "eu-west-3b"
+  tags              = { Name = "Hub-Transit-Subnet-B" }
+}
+
+# --- Central Hub: Inspection VPC ---
+resource "aws_vpc" "inspection_vpc" {
+  cidr_block           = "10.10.0.0/16"
+  enable_dns_hostnames = true
+  tags                 = { Name = "Hub-Inspection-VPC" }
+}
+
 # --- Disaster Recovery: AWS Backup ---
 resource "aws_backup_vault" "paris_vault" {
   name = "paris-primary-vault"
