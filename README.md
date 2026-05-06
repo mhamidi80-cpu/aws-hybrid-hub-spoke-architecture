@@ -10,10 +10,10 @@ Region: Paris (eu-west-3) / DR: Frankfurt (eu-central-1)
 This project implements a highly secure, scalable, and resilient hybrid cloud infrastructure. The architecture transitions legacy on-premise workloads from a Paris Data Center into a modern AWS environment using a Centralized Inspection Hub-and-Spoke model.
 2. Infrastructure Visualization
 A. Core Cloud Topology (Egress & East-West)
-
+![Core Topology](Global_Toplogy.png)
 This diagram illustrates the centralized inspection flow where all traffic between spokes and the internet is scrubbed by the AWS Network Firewall.
 B. Hybrid Link Architecture (Connectivity)
-
+![Hybrid Connection](Cloud_Onprem_Connection.png)
 This diagram details the secure Site-to-Site VPN connection and BGP propagation logic bridging the Paris Data Center with the AWS Transit Gateway.
 3. Technical Specifications
 Networking & Transit
