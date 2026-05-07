@@ -1,0 +1,5 @@
+aws_region         = "eu-west-3"
+environment        = "production"
+inspection_vpc_cidr = "10.10.0.0/16"
+spoke_a_cidr       = "10.1.0.0/16"
+spoke_b_cidr       = "10.2.0.0/16"

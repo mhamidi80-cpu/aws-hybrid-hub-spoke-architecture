@@ -1,0 +1,46 @@
+.
+├── documentation
+│   ├── architecture
+│   │   └── bgp-config.md
+│   └── diagrams
+│       ├── Cloud_Onprem_Connection.png
+│       ├── Global_Topology.png
+│       └── Global_Topology_Update.png
+├── LICENSE
+├── README.md
+├── terraform
+│   ├── environments
+│   │   ├── disaster-recovery
+│   │   │   ├── backend.tf
+│   │   │   ├── main.tf
+│   │   │   ├── providers.tf
+│   │   │   ├── terraform.tfvars
+│   │   │   └── versions.tf
+│   │   └── production
+│   │       ├── backend.tf
+│   │       ├── main.tf
+│   │       ├── providers.tf
+│   │       ├── terraform.tfvars
+│   │       └── versions.tf
+│   ├── modules
+│   │   ├── observability
+│   │   │   ├── main.tf
+│   │   │   ├── outputs.tf
+│   │   │   └── variables.tf
+│   │   ├── security
+│   │   │   ├── main.tf
+│   │   │   ├── outputs.tf
+│   │   │   └── variables.tf
+│   │   ├── tgw
+│   │   │   ├── main.tf
+│   │   │   ├── outputs.tf
+│   │   │   └── variables.tf
+│   │   └── vpc
+│   │       ├── main.tf
+│   │       ├── outputs.tf
+│   │       └── variables.tf
+│   ├── README.md
+│   └── terraform.tfvars.example
+└── tree.text
+
+13 directories, 31 files
