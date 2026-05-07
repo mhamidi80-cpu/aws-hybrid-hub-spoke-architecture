@@ -25,7 +25,7 @@ This project implements a professional **Hub-and-Spoke** network topology in AWS
 - **Linux** (Development on ThinkPad P50)
 
 ##  Topology
-![Network Topology](./Global_Toplogy.png)
+![Network Topology](./documentation/diagrams/Global_Toplogy.png)
 *Note: The management path (M1) represents the logical SSH session from the administrator workstation to the Bastion via the Internet Gateway.*
 
 ## How to Deploy
