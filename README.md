@@ -1,99 +1,290 @@
 # AWS Hybrid Hub-and-Spoke Architecture
 
 ## Overview
-This project implements a professional **Hub-and-Spoke** network topology in AWS using **Terraform**. It simulates a hybrid cloud environment where a central "Inspection" Hub manages traffic between multiple private "Spoke" VPCs and an on-premises data center.
+
+This project implements a professional **Hub-and-Spoke** network topology in AWS using **Terraform**. It simulates a hybrid cloud environment where a central **Inspection Hub** manages traffic between multiple private **Spoke VPCs** and an on-premises data center.
+
+---
+
+# Hybrid Cloud Modernization: Secure Hub-and-Spoke Architecture
+
+**Consultant:** Mohamed Hamidi  
+**Status:** Production-Ready  
+**Primary Region:** Paris (`eu-west-3`)  
+**Disaster Recovery Region:** Frankfurt (`eu-central-1`)
+
+---
 
 ## Architecture Components
-- **The Hub (Inspection VPC):** Centralized VPC containing the Transit Gateway (TGW) and a secure Bastion Host.
-- **The Spokes:** 
-    - **Spoke A (Production):** Isolated workload environment.
-    - **Spoke B (Development):** Segmented testing environment.
-- **Transit Gateway (TGW):** The "Network Brain" routing traffic between VPCs and the VPN.
-- **Security & Management:**
-    - **Bastion Host:** Single, secure entry point for administrative SSH access.
-    - **Security Groups:** Micro-segmentation allowing only specific web and management traffic.
-    - **Route Tables:** Custom routing ensuring all inter-spoke traffic is inspected.
+
+### The Hub (Inspection VPC)
+Centralized VPC containing:
+- AWS Transit Gateway (TGW)
+- Bastion Host
+- Centralized inspection services
+- Future-ready AWS Network Firewall integration
+
+### The Spokes
+- **Spoke A (Production):** Isolated production workload environment
+- **Spoke B (Development):** Segmented development/testing environment
+
+### Transit Gateway (TGW)
+Acts as the central routing core ("network brain") connecting:
+- VPCs
+- VPN attachments
+- On-premises infrastructure
+
+### Security & Management
+- **Bastion Host:** Secure administrative entry point
+- **Security Groups:** Micro-segmentation and least-privilege access
+- **Custom Route Tables:** Traffic inspection enforcement
+- **Private Subnets:** No direct internet access for workloads
+
+---
 
 ## Security Features
-- **No Direct Internet Access:** All Spoke instances are in private subnets.
-- **Least Privilege:** Security groups restrict SSH access specifically to the Bastion host.
-- **Centralized Inspection:** Architecture is ready for AWS Network Firewall integration at the Hub.
+
+- No direct internet access for spoke workloads
+- Centralized traffic inspection architecture
+- Least-privilege security model
+- SSH access restricted through Bastion Host
+- Hybrid-ready VPN architecture
+- Designed for AWS Network Firewall integration
+
+---
 
 ## Tech Stack
+
 - **Terraform** (Infrastructure as Code)
-- **AWS** (VPC, TGW, EC2, VPN)
-- **Linux** (Development on ThinkPad P50)
+- **AWS**
+  - VPC
+  - Transit Gateway
+  - EC2
+  - Site-to-Site VPN
+  - AWS Network Firewall
+  - CloudWatch
+  - AWS Backup
+- **Linux**
+  - Developed on ThinkPad P50
 
-##  Topology
-![Network Topology](./documentation/diagrams/Global_Toplogy.png)
-*Note: The management path (M1) represents the logical SSH session from the administrator workstation to the Bastion via the Internet Gateway.*
+---
 
-## How to Deploy
-1. Clone the repo: `git clone https://github.com/mhamidi80-cpu/aws-hybrid-hub-spoke-architecture.git`
-2. Initialize Terraform: `terraform init`
-3. Plan the infrastructure: `terraform plan`
-4. Apply changes: `terraform apply`
+# Infrastructure Visualization
 
-Hybrid Cloud Modernization: Secure Hub-and-Spoke Architecture
+## A. Core Cloud Topology (Initial Design)
 
-Consultant: Mohamed Hamidi
+![Network Topology](./documentation/diagrams/Global_Topology.png)
 
-Status: Production-Ready
+> Note: The management path (M1) represents the logical SSH session from the administrator workstation to the Bastion Host via the Internet Gateway.
 
-Region: Paris (eu-west-3) / DR: Frankfurt (eu-central-1)
-1. Executive Summary
+---
 
-This project implements a highly secure, scalable, and resilient hybrid cloud infrastructure. The architecture transitions legacy on-premise workloads from a Paris Data Center into a modern AWS environment using a Centralized Inspection Hub-and-Spoke model.
-2. Infrastructure Visualization
-A. Core Cloud Topology (Egress & East-West)
-![Core Topology](Global_Toplogy_Update.png)
-This diagram illustrates the centralized inspection flow where all traffic between spokes and the internet is scrubbed by the AWS Network Firewall.
-B. Hybrid Link Architecture (Connectivity)
-![Hybrid Connection](Cloud_Onprem_Connection.png)
-This diagram details the secure Site-to-Site VPN connection and BGP propagation logic bridging the Paris Data Center with the AWS Transit Gateway.
-3. Technical Specifications
-Networking & Transit
+## B. Core Cloud Topology (Updated Inspection Architecture)
 
-    AWS Transit Gateway (TGW): Central hub for all VPC and VPN attachments.
+![Core Topology](./documentation/diagrams/Global_Topology_Update.png)
 
-    Inspection VPC: Dedicated security VPC hosting AWS Network Firewall and NAT Gateways.
+This diagram illustrates the centralized inspection flow where all traffic between spokes and the internet is inspected by AWS Network Firewall.
 
-    Site-to-Site VPN: Dual-tunnel IPsec (AES-256) providing redundant paths to on-premise infrastructure.
+---
 
-Security & Governance
+## C. Hybrid Link Architecture (Connectivity)
 
-    Zero-Trust Posture: Hairpin inspection for all traffic via TGW Appliance Mode.
+![Hybrid Connection](./documentation/diagrams/Cloud_Onprem_Connection.png)
 
-    FQDN Filtering: Stateful firewall rules allowing only verified corporate and AWS domains.
+This diagram details the secure Site-to-Site VPN connection and BGP route propagation between the Paris Data Center and AWS Transit Gateway.
 
-    IAM Governance: Role-based access requiring MFA and Service Control Policies (SCPs) to prevent regional sprawl.
+---
 
-Resilience & Observability
+# Technical Specifications
 
-    Centralized Logging: VPC Flow Logs and Firewall alerts consolidated in CloudWatch Logs.
+## Networking & Transit
 
-    Disaster Recovery: Automated AWS Backup with cross-region replication to Frankfurt (eu-central-1) for a 4-hour RTO.
+### AWS Transit Gateway (TGW)
+Central routing hub for:
+- VPC attachments
+- VPN attachments
+- Inter-spoke communication
 
-4. Infrastructure as Code (Terraform)
+### Inspection VPC
+Dedicated security VPC hosting:
+- AWS Network Firewall
+- NAT Gateways
+- Inspection routing logic
 
-The project is modularized for enterprise deployment:
+### Site-to-Site VPN
+- Dual IPsec tunnels
+- AES-256 encryption
+- Dynamic BGP routing
+- Redundant hybrid connectivity
 
-    /modules/vpc: Multi-AZ VPCs (Inspection & App Spokes).
+---
 
-    /modules/tgw: Transit Gateway, Route Tables, and VPN configurations.
+## Security & Governance
 
-    /modules/security: Network Firewall policies and IAM Roles.
+### Zero-Trust Architecture
+All East-West and Egress traffic is inspected using:
+- TGW Appliance Mode
+- Centralized firewall policies
 
-    /modules/dr: Backup plans and cross-region vault replication.
+### FQDN Filtering
+Stateful inspection allowing only:
+- Approved corporate domains
+- Authorized AWS endpoints
 
-5. Operations & Verification
+### IAM Governance
+- MFA enforcement
+- Role-based access control (RBAC)
+- Service Control Policies (SCPs)
 
-Testing the Environment:
+---
 
-    VPN Check: Verify BGP status is up for both IPsec tunnels.
+## Resilience & Observability
 
-    Firewall Check: Attempt to curl an unauthorized domain (should be dropped).
+### Centralized Logging
+- VPC Flow Logs
+- AWS Network Firewall alerts
+- CloudWatch Logs integration
 
-    Hybrid Check: Ensure internal routing between 10.20.0.0/16 (AWS) and 192.168.0.0/16 (Paris) is active.
+### Disaster Recovery
+- Automated AWS Backup
+- Cross-region replication to Frankfurt (`eu-central-1`)
+- Recovery Time Objective (RTO): 4 hours
 
-    Note: All visual assets are property of Mohamed Hamidi Consulting and represent the final approved state of the Hybrid Modernization Program.
+---
+
+# Infrastructure as Code (Terraform)
+
+The project is modularized for enterprise-scale deployment.
+
+## Repository Structure
+
+```text
+terraform/
+├── modules/
+│   ├── vpc/
+│   ├── tgw/
+│   ├── security/
+│   └── dr/
+│
+├── environments/
+│   ├── dev/
+│   └── prod/
+│
+documentation/
+└── diagrams/
+    ├── Global_Topology.png
+    ├── Global_Topology_Update.png
+    └── Cloud_Onprem_Connection.png
+```
+
+---
+
+## Terraform Modules
+
+### `/modules/vpc`
+- Multi-AZ VPC deployment
+- Inspection and spoke VPCs
+- Public/private subnet creation
+
+### `/modules/tgw`
+- Transit Gateway
+- TGW route tables
+- VPN attachments
+- BGP configuration
+
+### `/modules/security`
+- AWS Network Firewall policies
+- Security groups
+- IAM roles and policies
+
+### `/modules/dr`
+- Backup plans
+- Cross-region vault replication
+- Disaster recovery automation
+
+---
+
+# Deployment Instructions
+
+## Clone the Repository
+
+```bash
+git clone https://github.com/mhamidi80-cpu/aws-hybrid-hub-spoke-architecture.git
+cd aws-hybrid-hub-spoke-architecture
+```
+
+## Initialize Terraform
+
+```bash
+terraform init
+```
+
+## Validate the Configuration
+
+```bash
+terraform validate
+```
+
+## Preview Infrastructure Changes
+
+```bash
+terraform plan
+```
+
+## Deploy Infrastructure
+
+```bash
+terraform apply
+```
+
+---
+
+# Operations & Verification
+
+## VPN Verification
+- Confirm both IPsec tunnels are UP
+- Validate BGP route propagation
+
+## Firewall Validation
+Attempt access to unauthorized domains:
+
+```bash
+curl http://unauthorized-domain.com
+```
+
+Expected result:
+- Connection blocked by firewall policy
+
+## Hybrid Connectivity Test
+
+Verify routing between:
+- AWS CIDR: `10.20.0.0/16`
+- Paris Data Center CIDR: `192.168.0.0/16`
+
+---
+
+# Future Enhancements
+
+- AWS Network Firewall TLS inspection
+- AWS Organizations integration
+- CI/CD with GitHub Actions
+- Terraform Cloud remote state
+- AWS Security Hub integration
+- Multi-account landing zone architecture
+
+---
+
+# License
+
+Licensed under the MIT License.
+
+---
+
+# Author
+
+**Mohamed Hamidi**  
+Cloud Infrastructure & Network Engineering Consultant
+
+---
+
+> All visual assets are property of Mohamed Hamidi Consulting and represent the final approved state of the Hybrid Modernization Program.
